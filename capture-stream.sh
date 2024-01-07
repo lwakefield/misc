@@ -29,10 +29,12 @@ if [ -z "$target" ] || [ -z "$output" ] || [ -z "$duration" ]; then
     exit 1
 fi
 
-curl $target > $output & pid=$!
+mkfifo curlout-$output.pipe
+curl $target > curlout-$output.pipe & pid1=$!
+ia upload $output - --remote-name=$output --metadata="title:$output" < curlout-$output.pipe & pid2=$!
 
 sleep $duration
-kill $pid
-tail --pid=$pid -f /dev/null
-
-ia upload $output $output --metadata="title=$output"
+kill $pid1
+tail --pid=$pid1 -f /dev/null
+tail --pid=$pid2 -f /dev/null
+rm curlout-$output.pipe
