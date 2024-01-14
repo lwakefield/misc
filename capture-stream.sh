@@ -32,10 +32,7 @@ fi
 
 archive_n_cleanup () {
     echo "uploading $1..."
-    ia upload $(basename $1) $1
-    # sleep 15 # fake uploading to test...
-    rm -r $(dirname $1)
-    echo "done uploading + cleaning up $1..."
+    (ia upload $(basename $1) $1 && rm -r $(dirname $1) && echo "done uploading + cleaning up $1...")  || echo "error uploading $1..."
 }
 
 # we are streaming in 6h chunks, where chunks always finish on a 6h boundary (eg. 12a 6a 12p 6p)
