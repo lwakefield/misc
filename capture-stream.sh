@@ -39,7 +39,7 @@ archive_n_cleanup () {
 while true; do
     # 00 - open the stream ASAP
     d=$(mktemp -d)
-    f=$d/$(printf $name_fmt $(date +"%Y-%m-%dT%H-%M-%S"))
+    f=$d/$(printf $name_fmt $(date +"%Y-%m-%dT%H-%M-%S-%Z"))
 
     curl -s $target > $f & curl_pid=$!
 
