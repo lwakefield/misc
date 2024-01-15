@@ -18,6 +18,14 @@ while [[ $# -gt 0 ]]; do
             name_fmt="$2"
             shift 2  # Consume both the option and its value
             ;;
+        --accesskey)
+            accesskey="$2"
+            shift 2  # Consume both the option and its value
+            ;;
+        --secretkey)
+            secretkey="$2"
+            shift 2  # Consume both the option and its value
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -32,7 +40,13 @@ fi
 
 archive_n_cleanup () {
     echo "uploading $1..."
-    (ia upload $(basename $1) $1 && rm -r $(dirname $1) && echo "done uploading + cleaning up $1...")  || echo "error uploading $1..."
+    (curl --location --header 'x-amz-auto-make-bucket:1' \
+        --header "authorization: LOW $accesskey:$secretkey" \
+        --upload-file $1 \
+        http://s3.us.archive.org/$(basename $1)/$(basename $1) \
+        && rm -r $(dirname $1) \
+        && echo "done uploading + cleaning up $1..."
+    ) || echo "error uploading $1..."
 }
 
 # we are streaming in 6h chunks, where chunks always finish on a 6h boundary (eg. 12a 6a 12p 6p)
@@ -55,4 +69,6 @@ while true; do
 
     # 02 - fire n' forget so we can start capturing the next stream
     archive_n_cleanup $f &
+
+    # wait && exit # for testing...
 done
